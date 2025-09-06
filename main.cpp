@@ -7,16 +7,10 @@
 #include <chrono>
 
 int main() {
-<<<<<<< HEAD
- 
-    // test push
-
-=======
->>>>>>> 04fc8c1 (WIP before pulling)
     Solver s1;
     int passed = 0;
 
-    std::ifstream inputFile("End_Easy.txt");
+    std::ifstream inputFile("Testing_Suite/End_Easy.txt");
     if (!inputFile.is_open()) {
         std::cerr << "Error opening file!" << '\n';
         return 1;
