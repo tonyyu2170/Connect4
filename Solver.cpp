@@ -25,7 +25,7 @@ int Solver::negamax(Board &board, int alpha, int beta) {
 
     if (beta > bestScore) {
         beta = bestScore;
-        if (alpha >= beta) {
+        if (alpha >= beta){
             return beta;
         }
     }
@@ -53,8 +53,34 @@ int Solver::negamax(Board &board, int alpha, int beta) {
     }
 
     TT.put(board.key(), alpha + 19);
-
     return alpha;
+}
+
+int Solver::solve(Board &board) {
+    int minScore = -((41 - board.getNumMoves())/2);
+    int maxScore = ((41 - board.getNumMoves())/2);
+
+    int guess = 0;
+
+    while (minScore < maxScore) {
+        int mid = minScore + (maxScore - minScore) / 2;
+
+        if (mid <= 0 && minScore/2 < mid) {
+            mid = minScore/2;
+        } else if (mid >= 0 && maxScore/2 > mid) {
+            mid = maxScore/2;  
+        }
+
+        int r = negamax(board, mid, mid+1);
+
+        if (r <= mid) {
+            maxScore = r;
+        } else {
+            minScore = r;
+        }
+    }
+
+    return minScore;
 }
 
 unsigned long long Solver::getNodeCount() {

@@ -10,7 +10,7 @@ int main() {
     Solver s1;
     int passed = 0;
 
-    std::ifstream inputFile("../Testing_Suite/End_Easy.txt");
+    std::ifstream inputFile("../Testing_Suite/Begin_Easy.txt");
     if (!inputFile.is_open()) {
         std::cerr << "Error opening file!" << '\n';
         return 1;
@@ -34,7 +34,7 @@ int main() {
         }
         
         Board b1(position);
-        int result = s1.negamax(b1, -10000, 10000);
+        int result = s1.solve(b1);
         
         if (result == expected) {
             std::cout << "Test " << testNum << ": PASS" << '\n';
