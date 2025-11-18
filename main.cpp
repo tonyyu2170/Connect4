@@ -10,7 +10,7 @@ int main() {
     Solver s1;
     int passed = 0;
 
-    std::ifstream inputFile("Testing_Suite/End_Easy.txt");
+    std::ifstream inputFile("../Testing_Suite/End_Easy.txt");
     if (!inputFile.is_open()) {
         std::cerr << "Error opening file!" << '\n';
         return 1;
@@ -27,15 +27,15 @@ int main() {
         std::istringstream ss(line);
         std::string position;
         int expected;
-
+        
         if (!(ss >> position >> expected)) {
             std::cerr << "Error parsing line: " << line << '\n';
             continue;
         }
-
+        
         Board b1(position);
         int result = s1.negamax(b1, -10000, 10000);
-
+        
         if (result == expected) {
             std::cout << "Test " << testNum << ": PASS" << '\n';
             passed++;
@@ -43,10 +43,10 @@ int main() {
             std::cout << "Test " << testNum << ": FAIL (expected " 
                       << expected << ", got " << result << ")" << '\n';
         }
-
+        
         testNum++;
     }
-
+    
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
 

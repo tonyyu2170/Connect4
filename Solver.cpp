@@ -4,7 +4,7 @@ int Solver::negamax(Board &board, int alpha, int beta) {
     if (board.isDraw())
         return 0;
 
-    for (int i = 1; i < 8; i++) {
+    for (int i = 0; i < 7; i++) {
         if (board.isWinningMove(i, board.getTurn())) {
             return (43 - board.getNumMoves())/2;
         }
@@ -38,7 +38,7 @@ int Solver::negamax(Board &board, int alpha, int beta) {
 }
 
 std::vector<int> Solver::sortMoves(Board& board) {
-    int cols[7] = {1,2,3,4,5,6,7};
+    int cols[7] = {0,1,2,3,4,5,6};
     int scores[7];
 
     for (int i = 0; i < 7; i++) {

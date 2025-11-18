@@ -13,7 +13,7 @@ Board::Board(std::string pos) {
     turn = PLAYER_1;
     numMoves = 0;
     for (int i = 0; i < pos.length(); i++) {
-        Board::move(pos[i] - '0', turn);
+        Board::move(pos[i] - '1', turn);
     }
 }
 
@@ -37,8 +37,8 @@ bool Board::move(int col, char player) {
         return false;
     }
 
-    board.at(nextOpenSpace.at(col-1)) = player;
-    nextOpenSpace.at(col-1) -= 7;
+    board.at(nextOpenSpace.at(col)) = player;
+    nextOpenSpace.at(col) -= 7;
 
     turn == 'r' ? turn = 'y' : turn = 'r';
     numMoves++;
@@ -47,13 +47,13 @@ bool Board::move(int col, char player) {
 }
 
 bool Board::canMove(int col) {
-    return nextOpenSpace.at(col-1) >= 0;
+    return nextOpenSpace.at(col) >= 0;
 }
 
 bool Board::isWinningMove(int col, char player) {
     bool isWinning = false;
 
-    int savedNext = nextOpenSpace.at(col-1);
+    int savedNext = nextOpenSpace.at(col);
     char savedTurn = turn;
     int savedNumMoves = numMoves;
 
@@ -61,7 +61,7 @@ bool Board::isWinningMove(int col, char player) {
         isWinning = hasWon(col, player);
 
         // Undo move exactly
-        nextOpenSpace.at(col-1) = savedNext;
+        nextOpenSpace.at(col) = savedNext;
         board.at(savedNext) = ' ';
         turn = savedTurn;
         numMoves = savedNumMoves;
@@ -73,7 +73,7 @@ bool Board::isWinningMove(int col, char player) {
 
 // Only checking spaces affected by the last move
 bool Board::hasWon(int col, char player) {
-    int index = nextOpenSpace.at(col-1) + COLUMNS;
+    int index = nextOpenSpace.at(col) + COLUMNS;
 
     // Vertical
     if (index < 21 && player == board.at(index + COLUMNS) && player == board.at(index + COLUMNS * 2) && player == board.at(index + COLUMNS * 3)) {

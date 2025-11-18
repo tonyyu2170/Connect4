@@ -28,6 +28,7 @@ void Game::play() {
             }
         }
 
+        col -= 1;
         if (!board.move(col, player)) {
             std::cout << "Invalid move. Try again.\n";
             continue;
