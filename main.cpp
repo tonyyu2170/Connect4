@@ -10,7 +10,7 @@ int main() {
     Solver s1;
     int passed = 0;
 
-    std::ifstream inputFile("../Testing_Suite/Mid_Easy.txt");
+    std::ifstream inputFile("../Testing_Suite/End_Easy.txt");
     if (!inputFile.is_open()) {
         std::cerr << "Error opening file!" << '\n';
         return 1;
@@ -51,11 +51,14 @@ int main() {
     std::chrono::duration<double> elapsed = end - start;
 
     int totalTests = testNum - 1;
-    std::cout << "Pass rate: " 
+    std::cout << '\n' << "Pass rate: " 
               << (double) passed / totalTests * 100 << "%" << '\n';
     std::cout << "Total time: " << elapsed.count() << " seconds" << '\n';
     std::cout << "Average time per test: " 
               << (elapsed.count() / totalTests) << " seconds" << '\n';
+    std::cout << "Total node count: " << s1.getNodeCount() << '\n';
+    std::cout << "Average node count per test: "
+              << (double) s1.getNodeCount() / totalTests << '\n';
 
     inputFile.close();
     return 0;
