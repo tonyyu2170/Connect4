@@ -29,14 +29,16 @@ void Game::play() {
         }
 
         col -= 1;
-        if (!board.move(col, player)) {
+        if (!board.canMove(col)) {
             std::cout << "Invalid move. Try again.\n";
             continue;
         }
-        
 
+        bool wasWinning = board.isWinningMove(col);
+        board.play(col);
+        
         // Check win
-        if (board.hasWon(col, player)) {
+        if (wasWinning) {
             board.printBoard();
             printWinDialogue(player);
             running = false;

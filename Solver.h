@@ -7,8 +7,6 @@
 class Solver {
     public:
         int negamax(Board &board, int alpha, int beta);
-        std::vector<int> sortMoves(Board &board); 
-        int scoreMove(Board &board, int col);
 };
 
 #endif

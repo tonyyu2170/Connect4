@@ -1,19 +1,55 @@
 #include "Board.h"
+#include <bitset>
+#include <cassert>
+#include <iomanip>
+
+Board::U64 Board::bottom_mask(int col) {
+    return (UINT64_C(1) << (col * COL_BITS));
+}
+
+Board::U64 Board::top_mask(int col) {
+    return (UINT64_C(1) << ((HEIGHT - 1) + col * COL_BITS));
+}
+
+Board::U64 Board::column_mask(int col) {
+    return (((UINT64_C(1) << COL_BITS) - 1) << (col * COL_BITS));
+}
+
+bool Board::alignment(U64 pos) {
+    // horizontal
+    U64 m = pos & (pos >> COL_BITS);
+    if (m & (m >> (2 * COL_BITS))) return true;
+
+    // diagonal 1 (down-left / up-right)
+    m = pos & (pos >> HEIGHT);
+    if (m & (m >> (2 * HEIGHT))) return true;
+
+    // diagonal 2 (down-right / up-left)
+    m = pos & (pos >> (HEIGHT + 2));
+    if (m & (m >> (2 * (HEIGHT + 2)))) return true;
+
+    // vertical
+    m = pos & (pos >> 1);
+    if (m & (m >> 2)) return true;
+
+    return false;
+}
 
 Board::Board() {
-    board.fill(' ');
-    nextOpenSpace = {ROWS*COLUMNS-7, ROWS*COLUMNS-6, ROWS*COLUMNS-5, ROWS*COLUMNS-4, ROWS*COLUMNS-3, ROWS*COLUMNS-2, ROWS*COLUMNS-1};
-    turn = PLAYER_1;
+    current = 0;
+    mask = 0;
     numMoves = 0;
 }
 
 Board::Board(std::string pos) {
-    board.fill(' ');
-    nextOpenSpace = {ROWS*COLUMNS-7, ROWS*COLUMNS-6, ROWS*COLUMNS-5, ROWS*COLUMNS-4, ROWS*COLUMNS-3, ROWS*COLUMNS-2, ROWS*COLUMNS-1};
-    turn = PLAYER_1;
+    current = 0;
+    mask = 0;
     numMoves = 0;
-    for (int i = 0; i < pos.length(); i++) {
-        Board::move(pos[i] - '1', turn);
+    for (char c : pos) {
+        int col = c - '1';
+        if (col >= 0 && col < WIDTH && canMove(col)) {
+            play(col);
+        }
     }
 }
 
@@ -21,130 +57,86 @@ void Board::printBoard() {
 
     std::cout << "---------------------" << '\n';
 
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLUMNS; j++) {
-            char currentElement = board.at(i*COLUMNS + j);
-            std::cout << "[" << currentElement << "]";
+    U64 red, yellow;
+    if (getTurn() == 'r') {
+        red = current;
+        yellow = mask ^ current;
+    } else {
+        yellow = current;
+        red = mask ^ current;
+    }
+
+    for (int row = HEIGHT - 1; row >= 0; --row) {
+        std::cout << "|";
+        for (int col = 0; col < WIDTH; ++col) {
+            int bitIndex = col * COL_BITS + row;
+            U64 bit = (UINT64_C(1) << bitIndex);
+            if (red & bit) {
+                std::cout << "R|";
+            } else if (yellow & bit) {
+                std::cout << "Y|";
+            } else {
+                std::cout << " |";
+            }
         }
         std::cout << '\n';
     }
 
     std::cout << "---------------------" << '\n';
+    std::cout << " 1 2 3 4 5 6 7" << '\n';
 }
 
-bool Board::move(int col, char player) {
-    if (!canMove(col)) {
-        return false;
-    }
+bool Board::canMove(int col) const {
+    return ((mask & top_mask(col)) == 0);
+}
 
-    board.at(nextOpenSpace.at(col)) = player;
-    nextOpenSpace.at(col) -= 7;
-
-    turn == 'r' ? turn = 'y' : turn = 'r';
+void Board::play(int col) {
+    assert(col >= 0 && col < WIDTH);
+    U64 move = (mask + bottom_mask(col)) & column_mask(col);
+    assert(move != 0);
+    current = mask ^ current;
+    mask |= move;
     numMoves++;
-
-    return true;
 }
 
-bool Board::canMove(int col) {
-    return nextOpenSpace.at(col) >= 0;
+bool Board::isWinningMove(int col) const {
+    if (!canMove(col)) return false;
+    U64 move = (mask + bottom_mask(col)) & column_mask(col);
+    U64 pos = current | move;
+    return alignment(pos);
 }
 
-bool Board::isWinningMove(int col, char player) {
-    bool isWinning = false;
-
-    int savedNext = nextOpenSpace.at(col);
-    char savedTurn = turn;
-    int savedNumMoves = numMoves;
-
-    if (move(col, player)) {
-        isWinning = hasWon(col, player);
-
-        // Undo move exactly
-        nextOpenSpace.at(col) = savedNext;
-        board.at(savedNext) = ' ';
-        turn = savedTurn;
-        numMoves = savedNumMoves;
-    }
-
-    return isWinning;
+bool Board::isWinningMoveForOpponent(int col) const {
+    if (!canMove(col)) return false;
+    U64 move = (mask + bottom_mask(col)) & column_mask(col);
+    U64 opponent = mask ^ current;
+    U64 pos = opponent | move;
+    return alignment(pos);
 }
 
-
-// Only checking spaces affected by the last move
-bool Board::hasWon(int col, char player) {
-    int index = nextOpenSpace.at(col) + COLUMNS;
-
-    // Vertical
-    if (index < 21 && player == board.at(index + COLUMNS) && player == board.at(index + COLUMNS * 2) && player == board.at(index + COLUMNS * 3)) {
-        return true;
-    }
-
-    // Horizontal
-    int row = index / COLUMNS; 
-    int count = 0;
-    for (int currentColIndex = 0; currentColIndex < COLUMNS; currentColIndex++) {
-        if (board.at(row * COLUMNS + currentColIndex) == player) {
-            count++;
-            if (count == 4) return true;
-        } else{
-            count = 0;
-        }
-    }
-    
-    // Diagonal '/'
-    count = 0;
-    int r = row, c = index % COLUMNS;
-    while (r < ROWS-1 && c > 0) {
-        r++;
-        c--;
-    }
-    while (r >= 0 && c < COLUMNS) {
-        if (board.at(r*COLUMNS + c) == player) {
-            count++;
-            if (count == 4) return true;
-        } else {
-            count = 0;
-        }
-        r--;
-        c++;
-    }
-
-    // Diagonal '\'
-    count = 0;
-    r = row; c = index % COLUMNS;
-    while (r > 0 && c > 0) {
-        r--;
-        c--;
-    }
-    while (r < ROWS && c < COLUMNS) {
-        if (board.at(r*COLUMNS + c) == player) {
-            count++;
-            if (count == 4) return true;
-        } else {
-            count = 0;
-        }
-        r++;
-        c++;
-    }
-    
-    return false;
-
+bool Board::isDraw() const {
+    return numMoves >= HEIGHT * WIDTH;
 }
 
-bool Board::isDraw() {
-    for (int i = 0; i < COLUMNS; i++ ){
-        if (nextOpenSpace.at(i) >= 0) {
-            return false;
-        }
-    }
-    return true;
+char Board::getTurn() const {
+    // Player 1 (red) moves first. If numMoves is even -> red to move.
+    return (numMoves % 2 == 0) ? 'r' : 'y';
 }
 
-char Board::getTurn() {
-    return turn;
-}
-
-int Board::getNumMoves() {
+int Board::getNumMoves() const {
     return numMoves;
+}
+
+uint64_t Board::getCurrent() const {
+    return static_cast<uint64_t>(current);
+}
+
+uint64_t Board::getMask() const {
+    return static_cast<uint64_t>(mask);
+}
+
+void Board::setState(uint64_t newCurrent, uint64_t newMask, int newNumMoves) {
+    current = static_cast<U64>(newCurrent);
+    mask = static_cast<U64>(newMask);
+    numMoves = newNumMoves;
 }

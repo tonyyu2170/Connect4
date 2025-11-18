@@ -10,7 +10,7 @@ int main() {
     Solver s1;
     int passed = 0;
 
-    std::ifstream inputFile("../Testing_Suite/End_Easy.txt");
+    std::ifstream inputFile("../Testing_Suite/Mid_Easy.txt");
     if (!inputFile.is_open()) {
         std::cerr << "Error opening file!" << '\n';
         return 1;
