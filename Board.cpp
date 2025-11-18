@@ -1,7 +1,4 @@
 #include "Board.h"
-#include <bitset>
-#include <cassert>
-#include <iomanip>
 
 Board::U64 Board::bottom_mask(int col) {
     return (UINT64_C(1) << (col * COL_BITS));
@@ -139,4 +136,8 @@ void Board::setState(uint64_t newCurrent, uint64_t newMask, int newNumMoves) {
     current = static_cast<U64>(newCurrent);
     mask = static_cast<U64>(newMask);
     numMoves = newNumMoves;
+}
+
+uint64_t Board::key() const {
+    return current + mask;
 }

@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <string>
 #include <iostream>
+#include <bitset>
+#include <cassert>
+#include <iomanip>
 
 class Board {
     private:
@@ -38,6 +41,7 @@ class Board {
         uint64_t getCurrent() const;
         uint64_t getMask() const;
         void setState(uint64_t newCurrent, uint64_t newMask, int newNumMoves);
+        uint64_t key() const;
 };
 
 #endif

@@ -1,6 +1,13 @@
 #include "Solver.h"
 
+Solver::Solver() : TT(8388593) {
+    nodeCount = 0;
+    TT.reset();
+}
+
 int Solver::negamax(Board &board, int alpha, int beta) {
+    nodeCount++;
+
     if (board.isDraw())
         return 0;
 
@@ -11,6 +18,11 @@ int Solver::negamax(Board &board, int alpha, int beta) {
     }
 
     int bestScore = (41 - board.getNumMoves()) / 2;
+
+    if (int val = TT.get(board.key())) {
+        bestScore = val - 19;
+    }
+
     if (beta > bestScore) {
         beta = bestScore;
         if (alpha >= beta) {
@@ -18,7 +30,7 @@ int Solver::negamax(Board &board, int alpha, int beta) {
         }
     }
 
-    static const int order[7] = {3, 2, 4, 1, 5, 0, 6};
+    static const int order[7] = {3, 4, 2, 5, 1, 0, 6};
 
     for (int i = 0; i < 7; ++i) {
         int col = order[i];
@@ -40,5 +52,11 @@ int Solver::negamax(Board &board, int alpha, int beta) {
         }
     }
 
+    TT.put(board.key(), alpha + 19);
+
     return alpha;
+}
+
+unsigned long long Solver::getNodeCount() {
+    return nodeCount;
 }

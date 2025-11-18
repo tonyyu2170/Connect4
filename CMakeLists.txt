@@ -9,4 +9,5 @@ add_executable(connect4
     Solver.cpp
     Board.cpp
     Game.cpp
+    TranspositionTable.cpp
 )
